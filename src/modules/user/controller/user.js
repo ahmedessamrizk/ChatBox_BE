@@ -7,6 +7,9 @@ import bcrypt from 'bcryptjs'
 import { checkUser } from "../../../services/checkUser.js";
 import { calcDate } from '../../../services/calcDate.js';
 import { paginate } from "../../../services/pagination.js";
+import messageModel from "../../../../DB/models/message.model.js";
+import conversationModel, { chatType } from "../../../../DB/models/conversation.model.js";
+import  jwt  from 'jsonwebtoken';
 
 export const privateData = '-confirmEmail -isBlocked -password -code -accountType';
 const secureURL = "https://res.cloudinary.com/ddpckjxeg/image/upload/v1690312129/User/favpng_user-profile-avatar_vkodns.png";
@@ -29,7 +32,8 @@ export const updateProfile = asyncHandler(
         const updatedUser = await findByIdAndUpdate({ model: userModel, filter: { _id: req.user._id }, data: req.body, options: { new: true }, select: privateData });
         const bytes = CryptoJS.AES.decrypt(updatedUser.phone, process.env.CRYPTPHONESECRET);
         updatedUser.phone = bytes.toString(CryptoJS.enc.Utf8);
-        return res.status(200).json({ message: "done", updatedUser })
+        const token = jwt.sign({user:updatedUser}, process.env.EMAILTOKEN)
+        return res.status(200).json({ message: "done", token })
     }
 )
 
@@ -97,7 +101,7 @@ export const signOut = asyncHandler(
     async (req, res, next) => {
         let date = new Date()
         const result = await findOneAndUpdate({ model: userModel, filter: { _id: req.user._id }, data: { lastSeen: date, isOnline: false }, options: { new: true } });
-        return res.status(200).json({ message: "done" });
+        return res.status(200).json({ message: "done" , result});
     }
 )
 //filter by userName 
@@ -117,7 +121,20 @@ export const getUsers = asyncHandler(
                 user.phone = CryptoJS.AES.decrypt(user.phone, process.env.CRYPTPHONESECRET).toString(CryptoJS.enc.Utf8);
             }
         });
+        console.log(users)
         return res.status(200).json({ message: "done", users });
     }
 )
+
+export const getDashboard = asyncHandler(
+    async(req, res, next) => {
+        const messagesSent = await messageModel.countDocuments({sender: req.user._id})
+        const messagesReceived= await messageModel.countDocuments({sender: {$ne:[req.user._id]}, users:{$in:[req.user._id]}})
+        const chatsJoined = await conversationModel.countDocuments({users: {$in:[req.user._id]}, type:chatType.Chat})
+        const groupsJoined = await conversationModel.countDocuments({users: {$in:[req.user._id]}, type: chatType.Group})
+    return res.status(200).json({message: "done", analytics:{messagesSent, messagesReceived, chatsJoined, groupsJoined}})
+    }
+)
+    
+
 

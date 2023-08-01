@@ -2,11 +2,12 @@
   "name": "upvote-session",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "deploy": "firebase deploy --only functions:api"
   },
   "keywords": [],
   "author": "",

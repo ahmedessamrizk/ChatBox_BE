@@ -82,8 +82,9 @@ export const signIn = asyncHandler(
                 const { err, cause } = checkUser(user, ['confirmEmail']);
                 if (!err) {
                     const age = calcDate(user.DOB);
-                    await findByIdAndUpdate({ model: userModel, filter: { _id: user._id }, data: { isOnline: true, age, lastSeen: new Date }, select: "email" });
-                    const token = jwt.sign({ id: user._id }, process.env.SIGNINKEY, { expiresIn: '12h' });
+                    const updatedUser = await findByIdAndUpdate({ model: userModel, filter: { _id: user._id }, data: { isOnline: true, age, lastSeen: new Date }, options:{new: true}, select: "-password -confirmEmail -isDeleted -isBlock -createdAt -updatedAt" });
+                    
+                    const token = jwt.sign({ user: updatedUser }, process.env.SIGNINKEY, { expiresIn: '12h' });
                     return res.status(200).json({ message: "done", token });
                 } else {
                     return next(Error(err, { cause }));

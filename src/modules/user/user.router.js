@@ -15,6 +15,7 @@ router.get('/profile/:id', validation(userValidators.getProfile), auth(), userCo
 router.get('/profile', validation(userValidators.getProfile), auth(), userController.getProfile);
 router.get('/signout', auth(), userController.signOut);
 router.get('/users', validation(userValidators.getUsers), auth(), userController.getUsers);
+router.get('/dashboard', auth(), userController.getDashboard)
 
 
 

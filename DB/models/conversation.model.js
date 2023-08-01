@@ -6,10 +6,11 @@ export const chatType = {
 }
 
 const conversationSchema = new Schema({
-    users:[{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
-    type: { type: String, enum:[chatType.Chat, chatType.Group], required: true },
-    createdBy: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}
+    type: { type: String, enum: [chatType.Chat, chatType.Group], required: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    lastSeen: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, {
     timestamps: true
 })

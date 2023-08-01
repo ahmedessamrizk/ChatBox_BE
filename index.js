@@ -3,6 +3,7 @@ dotenv.config({ path: ('./config/.env') })
 import express from 'express'
 import { appRouter } from './src/modules/index.router.js';
 import { Server } from 'socket.io';
+import functions from 'firebase-functions'
 
 
 const app = express()
@@ -22,7 +23,6 @@ io.on('connection', (socket) => {
     // })
 
     socket.on("joinRoom", (data) => {
-        console.log(data)
         socket.join(data.conversationId)
     })
     // socket.on("leaveRoom", (conversationId) => {
@@ -31,10 +31,11 @@ io.on('connection', (socket) => {
     // })
 
     socket.on("sendMessage", (data) => {
-        console.log("onSendMessage: ", data)
         socket.to(data.conversationId).emit("displayChat", data)
         io.emit("getChats", data.friendId)
         // socket.leave(data.conversationId)
     })
 
 });
+
+export const api = functions.https.onRequest(app)

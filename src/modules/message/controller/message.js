@@ -8,7 +8,7 @@ import { asyncHandler } from './../../../middleware/asyncHandler.js';
 
 export const sendMessage = asyncHandler(
     async(req, res, next) => {
-        io.emit("reply", "hello client");
+        // io.emit("reply", "hello client");
         // recipient not required
         const { conversationId  } =  req.params;
         const { content, recipient, type } = req.body
@@ -26,10 +26,10 @@ export const sendMessage = asyncHandler(
         }
 
         // Create message
-        const message = await messageModel.create({content, recipient, conversation: conversationId, sender: req.user._id});
+        const message = await messageModel.create({content, recipient:conversation.users, conversation: conversationId, sender: req.user._id});
         if (message) { 
             //save message as last in its conversation
-            await conversationModel.updateOne({_id: conversationId}, {lastMessage: message._id})
+            await conversationModel.updateOne({_id: conversationId}, {lastMessage: message._id, $unset:{lastSeen: 1}})
             if(type === chatType.Group){
                 await groupModel.updateOne({conversation: conversationId}, {lastMessage: message._id})
             }

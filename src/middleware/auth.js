@@ -15,10 +15,10 @@ const auth = () => {
             } else {
                 const token = authorization.split(process.env.BEARERKEY)[1];
                 const decoded = jwt.verify(token, process.env.EMAILTOKEN);
-                if (!decoded?.id) {
+                if (!decoded?.user) {
                     res.status(400).json({ message: "Invalid payload data" });
                 } else {
-                    const user = await userModel.findById(decoded.id).select('userName');
+                    const user = await userModel.findById(decoded.user._id).select('userName');
                     if (!user) {
                         res.status(404).json({ message: "Invalid id" });
                     } else {

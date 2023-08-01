@@ -57,7 +57,7 @@ export const getUserGroups = asyncHandler(
             },
             {
                 path: 'lastMessage',
-                select: 'sender content',
+                select: 'sender content createdAt',
                 populate: {
                     path: 'sender',
                     select: 'firstName lastName profilePic'
@@ -79,7 +79,7 @@ export const getAllGroups = asyncHandler(
             },
             {
                 path: 'lastMessage',
-                select: 'sender content',
+                select: 'sender content createdAt',
                 populate: {
                     path: 'sender',
                     select: 'firstName lastName profilePic'
@@ -94,7 +94,6 @@ export const getAllGroups = asyncHandler(
 export const joinGroup = asyncHandler(
     async(req, res, next) => {
         const { groupId, password } = req.body;
-        console.log({ groupId, password })
         const group = await groupModel.findById(groupId).select('conversation password')
         if(group.password !== '' && group.password){
             if(!password){
@@ -132,7 +131,7 @@ export const getGroupMessages = asyncHandler(
                     path: 'sender',
                     select: 'firstName lastName profilePic'
                 }
-            ).select('sender content').sort({updatedAt: 1});
+            ).select('sender content createdAt').sort({updatedAt: 1});
 
             group = JSON.parse(JSON.stringify(group))
             group.messages = messages

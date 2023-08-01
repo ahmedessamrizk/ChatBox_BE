@@ -17,13 +17,13 @@ export const addConversation = asyncHandler(
         users.push(ownerId)
         if (type === chatType.Chat) {
             req.users = users
-            const oldConversation = await conversationModel.findOne({ users:{$all:users}, type: chatType.Chat })
+            const oldConversation = await conversationModel.findOne({ users: { $all: users }, type: chatType.Chat })
             if (!oldConversation && users.length === 2) {
                 req.createdBy = req.user._id
                 const conversation = await conversationModel.create(req.body);
                 return conversation ? res.status(201).json({ message: "done" }) : next(Error('failed to create the conversation', { cause: 404 }))
             } else {
-                    return res.status(200).json({message: "done"})
+                return res.status(200).json({ message: "done" })
             }
         }
     }
@@ -32,16 +32,26 @@ export const addConversation = asyncHandler(
 // get specific chat
 export const getSpecificChat = asyncHandler(
     async (req, res, next) => {
-        const { friendId } = req.params;
-        const ownerId = JSON.parse(JSON.stringify(req.user._id))
-        let recipients;
-        recipients = [ownerId, friendId]
+        const { conversationId } = req.params;
+        // const ownerId = JSON.parse(JSON.stringify(req.user._id))
+        // let recipients;
+        // recipients = [ownerId, friendId]
 
-        let conversation = await conversationModel.findOne({ users: {$all:[ownerId,friendId]}, type: chatType.Chat }).select('users').populate({
-            path: 'users',
-            select: 'firstName lastName profilePic isOnline',
-            match: { _id: { $ne: req.user._id } }
-        });
+        let conversation;
+        // if (friendId) {
+        //     //seen message
+        //     conversation = await conversationModel.findOneAndUpdate({ users: { $all: [ownerId, friendId] }, type: chatType.Chat }, { $addToSet: { lastSeen: req.user._id } }, { new: true }).select('users lastSeen').populate({
+        //         path: 'users',
+        //         select: 'firstName lastName profilePic isOnline',
+        //         match: { _id: { $ne: req.user._id } }
+        //     });
+        // } else {
+            conversation = await conversationModel.findOneAndUpdate({ _id: conversationId , type: chatType.Chat }, { $addToSet: { lastSeen: req.user._id } }, { new: true }).select('users lastSeen').populate({
+                path: 'users',
+                select: 'firstName lastName profilePic isOnline',
+                match: { _id: { $ne: req.user._id } }
+            });
+        // }
 
         if (conversation) {
             // get all messages
@@ -50,9 +60,10 @@ export const getSpecificChat = asyncHandler(
                     path: 'sender',
                     select: 'firstName lastName profilePic isOnline'
                 }
-            ).select('sender content').sort({ updatedAt: 1 });
+            ).select('sender content createdAt').sort({ updatedAt: 1 });
             conversation = JSON.parse(JSON.stringify(conversation))
             conversation.messages = messages
+
             return res.status(200).json({ message: "done", conversation })
 
         } else {
@@ -65,10 +76,10 @@ export const getSpecificChat = asyncHandler(
 export const getUserChats = asyncHandler(
     async (req, res, next) => {
         const ownerId = JSON.parse(JSON.stringify(req.user._id))
-        const chats = await conversationModel.find({ users: ownerId, type: chatType.Chat }).populate([
+        const chats = await conversationModel.find({ users: { $in: [req.user._id] }, type: chatType.Chat }).populate([
             {
                 path: 'lastMessage',
-                select: 'sender content',
+                select: 'sender content createdAt',
                 populate: {
                     path: 'sender',
                     select: 'firstName lastName profilePic'
@@ -80,7 +91,7 @@ export const getUserChats = asyncHandler(
                 select: 'firstName lastName profilePic',
                 match: { _id: { $ne: req.user._id } }
             }
-        ]).select('users lastMessage ').sort({ updatedAt: -1 });
+        ]).select('users lastMessage lastSeen').sort({ updatedAt: -1 });
         return chats ? res.status(200).json({ message: "done", chats }) : next(Error('something went wrong', { cause: 400 }))
     }
 )
@@ -95,9 +106,10 @@ export const getRecentChats = asyncHandler(
             }
         ).sort({ updatedAt: -1 })
         chats = JSON.parse(JSON.stringify(chats))
+        console.log(chats)
         for (let i = 0; i < chats.length; i++) {
             if (chats[i].type === chatType.Group) {
-                const group = await groupModel.findOne({ conversationModel: chats[i]._id }).select('name groupImageURL')
+                const group = await groupModel.findOne({ conversation: chats[i]._id }).select('name groupImageURL')
                 chats[i].details = group;
             }
         }
