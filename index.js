@@ -3,7 +3,6 @@ dotenv.config({ path: ('./config/.env') })
 import express from 'express'
 import { appRouter } from './src/modules/index.router.js';
 import { Server } from 'socket.io';
-import functions from 'firebase-functions'
 
 
 const app = express()
