@@ -37,4 +37,3 @@ io.on('connection', (socket) => {
 
 });
 
-export const api = functions.https.onRequest(app)
