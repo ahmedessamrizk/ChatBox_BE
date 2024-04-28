@@ -3,7 +3,6 @@ import userRouter from './user/user.router.js'
 import conversationRouter from './conversation/conversation.router.js'
 import groupRouter from './group/group.router.js'
 import messageRouter from './message/message.router.js'
-import morgan from 'morgan'
 import cors from 'cors'
 import express from 'express'
 import passport from 'passport'
@@ -17,13 +16,6 @@ export const appRouter = (app) => {
     app.use(express.urlencoded({ extended: true }))
     app.use(passport.initialize())
     app.use(cors({}));
-
-    //Returns request endpoint and time taken to execute it
-    // if (process.env.MODE === 'DEV') {
-    //     app.use(morgan("dev"))
-    // } else {
-    //     app.use(morgan("combined"))
-    // }
 
     //Base URL
     const baseURL = process.env.BASEURL

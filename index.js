@@ -15,24 +15,14 @@ export const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-    // io.emit("reply", "hello client");
-    // socket.on("hi", (data) => {
-    //     // console.log(data)
-    //     // io.emit("reply", "hello client");
-    // })
 
     socket.on("joinRoom", (data) => {
         socket.join(data.conversationId)
     })
-    // socket.on("leaveRoom", (conversationId) => {
-    //     // console.log("roomId: ", conversationId)
-    //     socket.leave(conversationId)
-    // })
 
     socket.on("sendMessage", (data) => {
         socket.to(data.conversationId).emit("displayChat", data)
         io.emit("getChats", data.friendId)
-        // socket.leave(data.conversationId)
     })
 
 });
