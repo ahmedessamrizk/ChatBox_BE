@@ -3,7 +3,7 @@ import conversationModel, { chatType } from '../../../../DB/models/conversation.
 import groupModel from '../../../../DB/models/group.model.js';
 import messageModel from '../../../../DB/models/message.model.js';
 import userModel from '../../../../DB/models/user.model.js';
-import { io } from '../../../../index.js';
+// import { io } from '../../../../index.js';
 import { asyncHandler } from './../../../middleware/asyncHandler.js';
 
 export const sendMessage = asyncHandler(
