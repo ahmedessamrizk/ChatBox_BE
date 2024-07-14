@@ -13,9 +13,10 @@ import { globalErrorHandling } from '../middleware/asyncHandler.js'
 
 export const appRouter = (app) => {
     app.use(express.json({}));
+    app.use(cors({}));
     app.use(express.urlencoded({ extended: true }))
     app.use(passport.initialize())
-    app.use(cors({}));
+    
 
     //Base URL
     const baseURL = process.env.BASEURL
